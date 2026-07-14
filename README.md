@@ -27,25 +27,25 @@ It handles multiple users or a whole family, tracking vitals and medications.
 
 ---
 
-## 📸 Interface Previews
+## 📸 Take a look:
 
 <details>
 <summary><b>🖼️ Example Screenshots</b></summary>
 
 ### Check-In / Track Sleep
-![Daily Check-In](https://github.com/wryandginger/poly/blob/main/screenshots/checkin.png?raw=true))
+![Daily Check-In](https://github.com/wryandginger/poly/blob/main/screenshots/checkin.png?raw=true)
 
-### Track Mood
-![Daily Check-In](https://github.com/wryandginger/poly/blob/main/screenshots/mood.png?raw=true))
+### Track Mood:
+![Daily Check-In](https://github.com/wryandginger/poly/blob/main/screenshots/mood.png?raw=true)
 
-### Export
-![Export Data](https://github.com/wryandginger/poly/blob/main/screenshots/export.png?raw=true))
+### Export Data:
+![Export Data](https://github.com/wryandginger/poly/blob/main/screenshots/export.png?raw=true)
 
-### Setup
-![Export Data](https://github.com/wryandginger/poly/blob/main/screenshots/setup.png?raw=true))
+### Medication Setup:
+![Export Data](https://github.com/wryandginger/poly/blob/main/screenshots/setup.png?raw=true)
 
-### Administrator Portal & Directory
-![Admin User Manager]((https://github.com/wryandginger/poly/blob/main/screenshots/setup.png?raw=true))
+### Administrator Portal & Directory:
+![Admin User Manager](https://github.com/wryandginger/poly/blob/main/screenshots/admin.png?raw=true)
 
 </details>
 
@@ -53,16 +53,16 @@ It handles multiple users or a whole family, tracking vitals and medications.
 
 ## 🛠️ Installation & Deployment
 
-Select your preferred platform setup method below to initialize your application environment instance.
+You can run this as python poly.py, but that's not as good as:
 
 <details>
-<summary><b>🐳 Option 1: Docker CLI Deployment</b></summary>
+<summary><b>🐳 Option 1: Docker CLI</b></summary>
 
 ### Step 1: Clone and Prepare Workspace
-Move your `poly.py` file and your `Dockerfile` into a target deployment directory on your host engine.
+Move your `poly.py` file and your `Dockerfile` into a target deployment directory on your host.
 
 ### Step 2: Build and Run Container Instance
-Execute the statement block below in your command-line workspace terminal interface. This binds storage variables and sets local timezone constraints matching your context targets:
+Execute the statement block below in your command-line. Adjust the enviornment variables as desired:
 
 ```bash
 docker run -d \
@@ -76,11 +76,10 @@ docker run -d \
   --restart unless-stopped \
   \$(docker build -q .)
 ```
-
 </details>
 
 <details>
-<summary><b>🕸️ Option 2: Portainer Deployment</b></summary>
+<summary><b>🚢 Option 2: Portainer Deployment</b></summary>
 
 ### Step 1: Open Portainer Dashboard
  - Create a New Web Stack via Git Repository
@@ -99,15 +98,14 @@ Set POLY_ADMIN_USER to your preferred username (e.g., Jane).
 Set POLY_ADMIN_PASS to a strong unique credential password.
 ```
 
-### Step 3: Deploy Stack
-Scroll down to the footer actions menu block and press **Deploy the stack**. Your deployment runner environment initializes background layers automatically.
+### Step 3: Deploy Stack:
+ - Scroll down to the footer and press **Deploy the stack**.
+ - Everything should build automatically.
 
-
-### Step 4: Verify/Change Your Host Local Volume Mount Points
+### Step 4: Verify/Change Your Host's Local Volume Mount Points
   - Portainer deploys stack folders out of a default directory.
-  - To change where your text templates and grade rules are permanently saved on your server's host file system, deploy the default project from github.
-  - Then detach the stack from github.
-  - You should then be able to change the docker-compose.yml properties or add host volume path adjustments.
+  - To change where your data is saved, first deploy the default project from github, then detach the stack from github.
+  - You should then be able to change the docker-compose.yml properties or add host volume path adjustments as needed.
 
 </details>
 
