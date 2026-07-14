@@ -5,6 +5,8 @@ services:
     ports:
       - "7436:7436"
     environment:
+      # Really important: Set the right time zone!!
+      - TZ=America/Los_Angeles
       # Overrides the default admin credentials here
       - POLY_ADMIN_USER=BeverlyCrusher
       - POLY_ADMIN_PASS=Crusher22BetaCharlie
