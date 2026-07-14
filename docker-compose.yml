@@ -1,0 +1,16 @@
+services:
+  poly-app:
+    build: .
+    container_name: poly_med_manager
+    ports:
+      - "7436:7436"
+    environment:
+      # Overrides the default admin credentials here
+      - POLY_ADMIN_USER=BeverlyCrusher
+      - POLY_ADMIN_PASS=Crusher22BetaCharlie
+      # Tells Poly to save the database into the persistent volume directory
+      - POLY_DB_PATH=/data/poly_med_tracker.db
+    volumes:
+      # Maps a local folder named 'poly_data' on your computer to '/data' inside the container
+      - ./poly_data:/data
+    restart: unless-stopped
