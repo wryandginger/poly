@@ -13,8 +13,8 @@ import gradio as gr
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.environ.get("POLY_DB_PATH", os.path.join(SCRIPT_DIR, "poly_med_tracker.db"))
 
-HARDCODED_ADMIN_USER = "admin"
-HARDCODED_ADMIN_PASS = "SuperPolyAdmin2026!"
+HARDCODED_ADMIN_USER = "BeverlyCrusher"
+HARDCODED_ADMIN_PASS = "Crusher22BetaCharlie"
 
 # ==========================================
 # 1. DATABASE & SECURITY INITIALIZATION
@@ -151,7 +151,7 @@ def list_system_users():
     with sqlite3.connect(DB_FILE) as conn:
         df = pd.read_sql_query("SELECT username FROM users ORDER BY username ASC", conn)
     if df.empty:
-        return pd.DataFrame(columns=["Registered Usernames (Patients)"])
+        return pd.DataFrame(columns=["Registered Usernames"])
     df.columns = ["Registered Users)"]
     return df
 
