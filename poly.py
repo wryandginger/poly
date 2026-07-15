@@ -253,7 +253,7 @@ def find_closest_dose(profile, username):
         return next_dose, t_val, m_val if m_val else " "
 
     # 3. Complete Fallback: If all configured items are already checked in for today
-    return 0, "DONE!", "All scheduled daily doses checked in. Great job! \n## Check back tomorrow."
+    return 1, "DONE!", "All scheduled daily doses checked in. Great job! \n## Check back tomorrow."
 
 
 def check_duplicate_dose(username, dose_idx):
