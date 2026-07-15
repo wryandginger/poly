@@ -204,13 +204,13 @@ def save_user_profile_db(username, count, t_vals, m_vals):
     return "✅ Poly saved your profile!"
 
 def find_closest_dose(profile, username):
-    """Calculates the closest dose within 6 hours, prioritizing the next unlogged slot."""
+    """Calculates the closest dose within 1 hour, prioritizing the next unlogged slot."""
     now = datetime.datetime.now()
     count = profile["count"]
     
     # Track the best slot available
     best_idx = None
-    min_delta = datetime.timedelta(hours=6) # 6-hour lookup window threshold boundary
+    min_delta = datetime.timedelta(hours=1) # 1-hour lookup window threshold boundary
     
     unlogged_slots = []
     
@@ -243,17 +243,17 @@ def find_closest_dose(profile, username):
             except ValueError:
                 continue
                 
-        # If something falls within the 6-hour window, use it
+        # If something falls within the time window, use it
         if best_idx is not None:
             t_val, m_val = profile["slots"][best_idx - 1]
-            return best_idx, t_val, m_val if m_val else "No medications assigned to this window slot."
+            return best_idx, t_val, m_val if m_val else " "
             
-        # Fallback: If outside 6 hours but unlogged things remain, serve the very next unlogged option right away
+        # Fallback: If outside time window but unlogged things remain, serve the very next unlogged option right away
         next_dose, t_val, m_val = unlogged_slots[0]
-        return next_dose, t_val, m_val if m_val else "No medications assigned to this window slot."
+        return next_dose, t_val, m_val if m_val else " "
 
     # 3. Complete Fallback: If all configured items are already checked in for today
-    return 1, "08:00", "All scheduled daily doses checked in. Great job! \n## Check back tomorrow."
+    return 0, "DONE!", "All scheduled daily doses checked in. Great job! \n## Check back tomorrow."
 
 
 def check_duplicate_dose(username, dose_idx):
