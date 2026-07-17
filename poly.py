@@ -166,14 +166,14 @@ def get_user_profile(username):
             return {
                 "count": int(row[0]) if row[0] is not None else 1,
                 "slots": [
-                    (row[1] or "08:00", row[2] or ""), 
+                    (row[1] or "07:00", row[2] or ""), 
                     (row[3] or "", row[4] or ""), 
                     (row[5] or "", row[6] or ""), 
                     (row[7] or "", row[8] or ""), 
                     (row[9] or "", row[10] or "")
                 ]
             }
-    return {"count": 1, "slots": [("08:00", ""), ("", ""), ("", ""), ("", ""), ("", "")]}
+    return {"count": 1, "slots": [("07:00", ""), ("", ""), ("", ""), ("", ""), ("", "")]}
 
 def save_user_profile_db(username, count, t_vals, m_vals):
     """Pads parameter lists and explicitly extracts individual strings for column storage."""
@@ -250,7 +250,7 @@ def find_closest_dose(profile, username):
             
         # Fallback: If outside time window but unlogged things remain, serve the very next unlogged option right away
         next_dose, t_val, m_val = unlogged_slots[0]
-        return next_dose, t_val, m_val if m_val else " "
+        return 1, "DONE!", "Scheduled daily dose checked in."
 
     # 3. Complete Fallback: If all configured items are already checked in for today
     return 1, "DONE!", "All scheduled daily doses checked in. Great job! \n## Check back tomorrow."
@@ -327,9 +327,10 @@ def render_dynamic_dashboard(request: gr.Request):
     
     greeting = f"## Welcome back, **{username}**: {tod} Time Check-In"
     dup_warning = f"## ✅ **GREAT JOB!**: \nYou have already did a check-in for **Dose #{dose_idx} ({t_target})** today. \nNo need to submit anything right now." if is_dup else ""
-    med_info = f"## 💊 [Dose #{dose_idx} @ {t_target}]:\n ## {m_target}"
+    med_info = f"## 💊 Dose #{dose_idx} @ {t_target}]: {m_target}"
     
-    return greeting, med_info, gr.update(visible=(tod == "Morning")), gr.update(visible=(tod in ["Mid-day", "Night"])), f"## 🦜", dose_idx, dup_warning
+    return greeting, med_info, gr.update(visible=(dose_idx == 1)), gr.update(visible=(tod in ["Mid-day", "Night"] and dose_idx > 1)), f"## 🦜", dose_idx, dup_warning
+
 
 
 
@@ -369,18 +370,37 @@ with gr.Blocks(title="Poly 🦜 | Med Manager") as demo:
                 btn_avg.click(lambda: 5, outputs=sleep_slider)
                 btn_great.click(lambda: 9, outputs=sleep_slider)
 
+                
             with gr.Group(visible=False) as mood_box:
                 gr.Markdown("### 🧠 Mood Tracking")
                 selected_mood_state = gr.Textbox(label="Selected Mood", value="😐 Neutral", interactive=False)
-                mood_options = [("😊", "Happy"), ("😐", "Neutral"), ("😰", "Anxious"), ("😢", "Sad"), ("😕", "Confused"), ("📉", "Depressed"), ("😡", "Angry"), ("😤", "Frustrated"), ("😴", "Tired"), ("⚡", "Energetic")]
+
+                mood_options = [
+                    ("😊", "Happy"), ("😢", "Sad"), ("😰", "Anxious"),
+                    ("😨", "Afraid"), ("😐", "Neutral"), ("😫", "Stressed"),
+                    ("😡", "Angry"), ("😤", "Frustrated"), ("😴", "Tired"),
+                    ("⚡", "Energetic")
+                ]
+
+                # Display first 5 moods in one row
                 with gr.Row():
-                    for emoji, name in mood_options[:5]: gr.Button(f"{emoji}\n{name}").click(lambda n=name, e=emoji: f"{e} {n}", outputs=selected_mood_state)
+                    for emoji, name in mood_options[:5]:
+                        gr.Button(f"{emoji}\n{name}").click(
+                            fn=lambda e=emoji, n=name: f"{e} {n}",
+                            outputs=selected_mood_state
+                        )
+                  
+                # Display remaining moods in another row
                 with gr.Row():
-                    for emoji, name in mood_options[5:]: gr.Button(f"{emoji}\n{name}").click(lambda n=name, e=emoji: f"{e} {n}", outputs=selected_mood_state)
+                    for emoji, name in mood_options[5:]:
+                        gr.Button(f"{emoji}\n{name}").click(
+                            fn=lambda e=emoji, n=name: f"{e} {n}",
+                            outputs=selected_mood_state
+                        ) 
 
             with gr.Group():
                 gr.Markdown("### 📊 Optional Data")
-                vitals_type = gr.Radio(["None", "Blood Pressure (120/80)", "Blood Sugar (mg/dL)"], label="Log a Vital Sign", value="None")
+                vitals_type = gr.Radio(["None", "Blood Pressure (120/80)", "Blood Sugar (mg/dL)", "Other (Symptoms)"], label="Log a Vital Sign", value="None")
                 vitals_value = gr.Textbox(label="Enter Value (e.g., 120/80 or 95)", visible=False)
                 
                 def handle_vitals_visibility(choice):
@@ -407,7 +427,16 @@ with gr.Blocks(title="Poly 🦜 | Med Manager") as demo:
             def process_submission(request: gr.Request, compliance, v_type, v_val, sleep, mood, dose_idx):
                 tod = get_time_of_day_context()
                 # 1. Log the check-in entry to the SQLite database
-                result = log_checkin(request.username, tod, compliance, v_type, v_val, sleep if tod == "Morning" else None, mood if tod in ["Mid-day", "Night"] else None, dose_idx)
+                result = log_checkin(
+                    request.username,
+                    tod,
+                    compliance,
+                    v_type,
+                    v_val,
+                    sleep if dose_idx == 1 else None,  # sleep only if dose_idx == 1
+                    mood if dose_idx != 1 else None,   # mood only if dose_idx != 1
+                    dose_idx
+                )
                 
                 # 2. Recalculate profile timeline metrics immediately for the next screen view state
                 profile = get_user_profile(request.username)
@@ -415,19 +444,19 @@ with gr.Blocks(title="Poly 🦜 | Med Manager") as demo:
                 is_dup = check_duplicate_dose(request.username, next_dose)
                 
                 # 3. Compile updated layout components to refresh on screen seamlessly
-                greeting = f"## Welcome back to Poly, **{request.username}** 🦜\n*{tod} Time Check-In Portal*"
+                greeting = f"## Welcome back: {tod} Time Check-In"
                 dup_banner_text = f"## ✅ **GREAT JOB!**: \nYou have already did a check-in for **Dose #{dose_idx} ({t_target})** today. \nNo need to submit anything right now." if is_dup else ""
-                med_summary_text = f"## 💊 Dose #{next_dose} @ {t_target}] \n># {m_target}"
-                dose_string_text = f"## 🦜"
+                med_summary_text = f"## 💊 Dose #{next_dose} @ {t_target} - {m_target}"
+                dose_string_text = f"## Dose #{next_dose}: {m_target}"
                 
                 return (
                     gr.update(visible=False),    # Hides confirmation container box 
                     result,                      # Outputs status message toast
                     greeting,                    # Refreshes user greeting string
                     med_summary_text,            # Advances medication regimen string text
-                    gr.update(visible=(tod == "Morning")),             # Re-evaluates morning slider panel box
-                    gr.update(visible=(tod in ["Mid-day", "Night"])), # Re-evaluates mood dropdown element box
-                    dose_string_text,            # Advances active compliance checkbox string prompt
+                    gr.update(visible=(dose_idx == 1)), # Sleep only for dose 1
+                    gr.update(visible=(dose_idx > 1)),  # Mood for all else
+                    dose_string_text,            # Advances active compliance checkbox string promp
                     next_dose,                   # Updates tracked internal step count tracking box
                     dup_banner_text              # Drops duplicate banner warn indicator if needed
                 )
