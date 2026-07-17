@@ -250,7 +250,7 @@ def find_closest_dose(profile, username):
             
         # Fallback: If outside time window but unlogged things remain, serve the very next unlogged option right away
         next_dose, t_val, m_val = unlogged_slots[0]
-        return 1, "DONE!", "Scheduled daily dose checked in."
+        return next_dose, t_val, m_val if m_val else " "
 
     # 3. Complete Fallback: If all configured items are already checked in for today
     return 1, "DONE!", "All scheduled daily doses checked in. Great job! \n## Check back tomorrow."
