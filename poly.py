@@ -327,7 +327,7 @@ def render_dynamic_dashboard(request: gr.Request):
     
     greeting = f"## Welcome back, **{username}**: {tod} Time Check-In"
     dup_warning = f"## ✅ **GREAT JOB!**: \nYou have already did a check-in for **Dose #{dose_idx} ({t_target})** today. \nNo need to submit anything right now." if is_dup else ""
-    med_info = f"## 💊 Dose #{dose_idx} @ {t_target}]: {m_target}"
+    med_info = f"## 💊 Dose #{dose_idx} @ {t_target}: {m_target}"
     
     return greeting, med_info, gr.update(visible=(dose_idx == 1)), gr.update(visible=(tod in ["Mid-day", "Night"] and dose_idx > 1)), f"## 🦜", dose_idx, dup_warning
 
@@ -400,8 +400,8 @@ with gr.Blocks(title="Poly 🦜 | Med Manager") as demo:
 
             with gr.Group():
                 gr.Markdown("### 📊 Optional Data")
-                vitals_type = gr.Radio(["None", "Blood Pressure (120/80)", "Blood Sugar (mg/dL)", "Other (Symptoms)"], label="Log a Vital Sign", value="None")
-                vitals_value = gr.Textbox(label="Enter Value (e.g., 120/80 or 95)", visible=False)
+                vitals_type = gr.Radio(["None", "Blood Pressure (120/80)", "Blood Sugar (mg/dL)", "Symptoms", "Personal Log", "Other"], label="Log something", value="None")
+                vitals_value = gr.Textbox(label="Enter Data:", lines=2, max_lines=20, visible=False)
                 
                 def handle_vitals_visibility(choice):
                     return gr.update(visible=(choice != "None"))
